@@ -4,7 +4,7 @@ import { IoIosArrowForward } from "react-icons/io";
 import { useState } from "react";
 import dynamic from 'next/dynamic';
 
-const Map = dynamic(() => import('./components/Map'), { ssr: false });
+const Map = dynamic(() => import('../pages/components/Map'), { ssr: false });
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
