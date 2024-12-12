@@ -33,7 +33,7 @@ const Map = ({ latitude, longitude, ipAddress, city, country }) => {
     }
   }, [latitude, longitude, ipAddress, city, country]);
 
-  return <div id="map" style={{ height: '100%', width: '100%' }} />;
+  return <div id="map" style={{ height: '100%', width: '100%',zIndex:"0" }} />;
 };
 
 export default Map;
