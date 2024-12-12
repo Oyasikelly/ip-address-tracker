@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -11,12 +12,14 @@ L.Icon.Default.mergeOptions({
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-export default function Map({ latitude, longitude, ipAddress, city, country }) {
+// Ensure the component runs only on the client side
+const Map = ({ latitude, longitude, ipAddress, city, country }) => {
     const mapRef = useRef(null);
     const markerRef = useRef(null);
 
     useEffect(() => {
-        if (!mapRef.current) {
+        if (typeof window !== 'undefined' && !mapRef.current) {
+            // Initialize the map
             const map = L.map('map').setView([latitude || 0, longitude || 0], 10);
             mapRef.current = map;
 
@@ -25,7 +28,8 @@ export default function Map({ latitude, longitude, ipAddress, city, country }) {
             }).addTo(map);
 
             markerRef.current = L.marker([latitude, longitude]).addTo(map);
-        } else {
+        } else if (mapRef.current) {
+            // Update the map and marker position
             mapRef.current.setView([latitude, longitude], 10);
             if (markerRef.current) {
                 markerRef.current.setLatLng([latitude, longitude]);
@@ -34,14 +38,16 @@ export default function Map({ latitude, longitude, ipAddress, city, country }) {
             }
         }
 
-        // if (markerRef.current) {
-        //     markerRef.current.bindPopup(`
-        //         <strong>IP Address:</strong> ${ipAddress}<br>
-        //         <strong>Location:</strong> ${city}, ${country}
-        //     `).openPopup();
-        // }
-        
+        if (markerRef.current) {
+            markerRef.current.bindPopup(`
+                <strong>IP Address:</strong> ${ipAddress}<br>
+                <strong>Location:</strong> ${city}, ${country}
+            `).openPopup();
+        }
     }, [latitude, longitude, ipAddress, city, country]);
 
-    return <div id="map" style={{ height: '100%', width: '100%',zIndex:"0" }} />;
-}
+    return <div id="map" style={{ height: '100%', width: '100%', zIndex: 0 }} />;
+};
+
+// Dynamically load the Map component to disable SSR
+export default dynamic(() => Promise.resolve(Map), { ssr: false });
