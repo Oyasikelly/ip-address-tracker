@@ -16,24 +16,46 @@ if (typeof window !== 'undefined') {
 
 const Map = ({ latitude, longitude, ipAddress, city, country }) => {
   const mapRef = useRef(null);
+  const mapInstanceRef = useRef(null);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && mapRef.current === null) {
+    if (typeof window !== 'undefined' && mapInstanceRef.current === null) {
+      // Initialize the map only once
       const map = L.map('map').setView([latitude || 0, longitude || 0], 10);
-      mapRef.current = map;
+      mapInstanceRef.current = map;
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(map);
 
-      L.marker([latitude, longitude]).addTo(map).bindPopup(`
-        <strong>IP Address:</strong> ${ipAddress}<br>
-        <strong>Location:</strong> ${city}, ${country}
-      `).openPopup();
+      mapRef.current = L.marker([latitude, longitude])
+        .addTo(map)
+        .bindPopup(` 
+          <strong>IP Address:</strong> ${ipAddress}<br>
+          <strong>Location:</strong> ${city}, ${country}
+        `)
+        .openPopup();
+    } else if (mapInstanceRef.current) {
+      // Update the map when props change
+      const map = mapInstanceRef.current;
+
+      map.setView([latitude || 0, longitude || 0], 10);
+
+      if (mapRef.current) {
+        map.removeLayer(mapRef.current); // Remove the old marker
+      }
+
+      mapRef.current = L.marker([latitude, longitude])
+        .addTo(map)
+        .bindPopup(`
+          <strong>IP Address:</strong> ${ipAddress}<br>
+          <strong>Location:</strong> ${city}, ${country}
+        `)
+        .openPopup();
     }
   }, [latitude, longitude, ipAddress, city, country]);
 
-  return <div id="map" style={{ height: '100%', width: '100%',zIndex:"0" }} />;
+  return <div id="map" style={{ height: '100%', width: '100%', zIndex: '0' }} />;
 };
 
 export default Map;
