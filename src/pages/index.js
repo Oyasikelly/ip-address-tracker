@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Geist, Geist_Mono } from "next/font/google";
 import { IoIosArrowForward } from "react-icons/io";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dynamic from 'next/dynamic';
 
 const Map = dynamic(() => import('../pages/components/Map'), { ssr: false });
@@ -16,10 +16,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export default function Home() {
-  const [geoData, setGeoData] = useState(null);
-  const [ipAddress, setIpAddress] = useState('8.8.8.8');
-  const [ipAddressResult, setIpAddressResult] = useState(null);
+export default function Home({ initialGeoData }) {
+  const [geoData, setGeoData] = useState(initialGeoData);
+  const [ipAddress, setIpAddress] = useState('');
+  const [ipAddressResult, setIpAddressResult] = useState(initialGeoData?.ip || '');
   const [error, setError] = useState(null);
 
   function handleIpAddress(e) {
@@ -28,8 +28,7 @@ export default function Home() {
 
   async function fetchGeoData() {
     setIpAddressResult(ipAddress);
-    setIpAddress('');
-    setError(null);  // Reset error state on new IP input
+    setError(null); // Reset error state on new IP input
     if (!ipAddress || !isValidIpAddress(ipAddress)) {
       setError('Please enter a valid IP address');
       return;
@@ -43,7 +42,6 @@ export default function Home() {
         throw new Error(`Error fetching data: ${response.status} ${response.statusText}`);
       }
       const data = await response.json();
-      console.log(data);
       setGeoData(data);
     } catch (error) {
       console.error('Failed to fetch geolocation data:', error);
@@ -53,7 +51,7 @@ export default function Home() {
 
   // Validate IP address format (basic check for valid IP)
   function isValidIpAddress(ip) {
-    const regex = /^((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(?:\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9]))|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])))$/;
+    const regex = /^((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(?:\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])))$/;
     return regex.test(ip);
   }
 
@@ -118,9 +116,35 @@ export default function Home() {
             </div>
           </>
         ) : (
-          <div className="text-gray-400 mt-4 text-center">Please enter a valid IP address to see the geolocation.</div>
+          <div className="text-gray-400 mt-4 text-center">Fetching your IP address...</div>
         )}
       </footer>
     </div>
   );
+}
+
+// Fetch user's IP and geolocation on the server side
+export async function getServerSideProps(context) {
+  const ipEndpoint = `https://get.geojs.io/v1/ip.json`;
+  const geoEndpoint = `https://get.geojs.io/v1/ip/geo/`;
+
+  try {
+    const ipResponse = await fetch(ipEndpoint);
+    const ipData = await ipResponse.json();
+    const geoResponse = await fetch(`${geoEndpoint}${ipData.ip}.json`);
+    const geoData = await geoResponse.json();
+
+    return {
+      props: {
+        initialGeoData: geoData,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching initial geo data:", error);
+    return {
+      props: {
+        initialGeoData: null,
+      },
+    };
+  }
 }
